@@ -1,0 +1,28 @@
+\documentclass{article}
+\usepackage{graphicx} % Required for inserting images
+\usepackage[fleqn]{amsmath}
+\usepackage[a4paper]{geometry}
+
+\title{Distributing Objects Evenly on a Line}
+\author{M. Atakan Gürkan}
+\date{February 2023}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+Our aim is to distribute identical objects on a line in a some sort of optimal manner. Let's say that the objects have width $w_e$, and they will fit in a region of width $w_t$. Call the number of objects $n$ and their separation $s$. Then it follows that
+\[ n\cdot w_e + (n-1)\cdot s = w_t\,, \quad\text{and}\quad
+n=\frac{w_t+s}{w_e+s}\,.\]
+
+Now we need some limits on $s$ to make our distribution pleasant. Let us say that the minimum acceptable $s$ is $kw_e$, and the maximum is $le_w$, where $k$ and $l$ are some percentages; e.g., $k=0.15$ and $l=0.60$. Note that smaller values of $s$ will lead to larger values of $n$, and vice versa. This means
+\[
+n_\text{min} = \left\lceil\frac{w_t+s_\text{max}}{w_e+s_\text{max}} \right\rceil
+\quad\text{and}\quad
+n_\text{max} = \left\lfloor\frac{w_t+s_\text{min}}{w_e+s_\text{min}} \right\rfloor \,.
+\]
+Hopefully, this gives you a nice range of $n$ values, and you can choose one amongst those according to your taste. Once you make this choice 
+\[ s = \frac{w_t - n w_e}{n-1}\,.\]
+Using this, you can set the centers of the objects you are distributing appropriately.
+\end{document}
