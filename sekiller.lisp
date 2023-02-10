@@ -17,8 +17,8 @@ They need to be defined via defmethod."))
 
 (defmethod a4paper ((s-f svg-file) &key (landscape nil))
   (if landscape
-      (setf (height s-f) "210mm" (width s-f) "297mm")
-      (setf (height s-f) "297mm" (width s-f) "210mm")))
+      (setf (height s-f) "210" (width s-f) "297")
+      (setf (height s-f) "297" (width s-f) "210")))
 
   
 (defgeneric boilerplate (svg-file)
@@ -65,7 +65,8 @@ Function to print the boilerplate for SVG files that goes to the top of the file
 
 (defmacro with-svg (s-f &rest body)
   `(progn
-     (format t "~&<~(svg width=\"~A\" height=\"~A\"~)>~%"
+     (format t "~&<svg width=\"~a~a\" height=\"~a~a\" viewBox=\"0 0 ~a ~a\">~%"
+	     (width ,s-f) (unit ,s-f) (height ,s-f) (unit ,s-f)
 	     (width ,s-f) (height ,s-f))
      (as desc (desc ,s-f))
      (as title (title ,s-f))
@@ -77,11 +78,11 @@ Function to print the boilerplate for SVG files that goes to the top of the file
 ;;; this needs to be rewritten, a lot of the confusing pieces can actually
 ;;; reside outside this macro. Apperantly this is a common beginner's mistake
 ;;; using macros where a function would do 
-(eval-when (:compile-toplevel)
-  (defun add-supplied-p-to-arglist (styleargs)
-    (loop for sa in styleargs
-	  collect (append sa `(,(intern (format nil "~a-SUPPLIED-P" (first sa))))))))
-
+;(eval-when (:compile-toplevel)
+;  (defun add-supplied-p-to-arglist (styleargs)
+;    (loop for sa in styleargs
+;	  collect (append sa `(,(intern (format nil "~a-SUPPLIED-P" (first sa))))))))
+;
 ;(defmacro defshape (elname ownargs styleargs (&optional (funname elname)))
 ;  (let ( (fullstyleargs (add-supplied-p-to-arglist styleargs)))
 ;    `(defun ,funname (&key ,@ownargs ,@fullstyleargs)
@@ -109,11 +110,12 @@ Function to print the boilerplate for SVG files that goes to the top of the file
 
 (defun bunch-of-circles (cy)
   (let ((r 12))
-    (loop for cx in (range 20 201 29)
+    (loop for cx in (get-cx-values 210 11 11 24 0.13 0.60)
 	  do (with2 circle
-		 (format t " r=\"~amm\" cx=\"~amm\" cy=\"~amm\"" r cx cy)
+		 (format t " r=\"~a\" cx=\"~a\" cy=\"~a\"" r cx cy)
 		 (format t " style=\"fill: none; stroke: black;")
-		 (format t " stroke-dasharray: 5 3;\"")))))
+		 (format t " stroke-width: 0.2;")
+		 (format t " stroke-dasharray: 1 0.6;\"")))))
 
 (defun bunch-of-ellipses (cy &key (rotated nil))
   (let* ((r 12)
@@ -122,13 +124,16 @@ Function to print the boilerplate for SVG files that goes to the top of the file
     (if rotated
 	(setf rx (* rx golden-ratio))
 	(setf ry (* ry golden-ratio)))
-    (loop for cx in (range 20 201 29)
+    (loop for cx in (get-cy-values 210 11 11 24 0.13 0.60)
 	  do (with2 ellipse
-		 (format t " rx=\"~amm\" ry=\"~amm\"" rx ry)
-		 (format t " cx=\"~amm\" cy=\"~amm\"" cx cy)
-		 (format t " transform=\"rotate(~a, ~amm, ~amm)\"" (random 360) cx cy)
+		 (format t " rx=\"~a\" ry=\"~a\"" rx ry)
+		 (format t " cx=\"~a\" cy=\"~a\"" cx cy)
 		 (format t " style=\"fill: none; stroke: black;")
-		 (format t " stroke-dasharray: 5 3;\"")))))
+		 (format t " stroke-width: 0.2;")
+		 (format t " stroke-dasharray: 1 0.6;\"")
+		 (format t " transform=\"rotate(~a, ~a, ~a)\"" (random 360) cx cy)
+;		 (format t " transform=\"rotate(~a)\"" (random 360))
+		 ))))
 
 (defun sekiller ()
   (let ((sek-svg (make-svg-file "sekiller" :unit "mm")))
@@ -156,3 +161,18 @@ Function to print the boilerplate for SVG files that goes to the top of the file
 		collect i)
 	  (loop for i from 0 below a
 		collect i))))
+
+(defun get-cx-values (page-width left-margin right-margin element-width min-sep-coeff max-sep-coeff)
+  (let* ((smin (* min-sep-coeff element-width))
+	 (smax (* max-sep-coeff element-width))
+	 (total-width (- page-width (+ left-margin right-margin)))
+	 (nmin (ceiling (/ (+ total-width smax) (+ element-width smax))))
+	 (nmax (floor (/ (+ total-width smin) (+ element-width smin))))
+	 (n (ceiling (/ (+ nmin nmax) 2)))
+	 (s (/ (- total-width (* n element-width)) (- n 1))))
+    (format t "~a ~a ~a ~e" nmin nmax n s)
+    (loop for i from 0 below n
+	  collect (+ (* i (+ s element-width))
+		     (* element-width 0.5) ; this turns fraction to float
+		     left-margin))))
+	       
