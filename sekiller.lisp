@@ -124,7 +124,7 @@ Function to print the boilerplate for SVG files that goes to the top of the file
     (if rotated
 	(setf rx (* rx golden-ratio))
 	(setf ry (* ry golden-ratio)))
-    (loop for cx in (get-cy-values 210 11 11 24 0.13 0.60)
+    (loop for cx in (get-cx-values 210 11 11 24 0.13 0.60)
 	  do (with2 ellipse
 		 (format t " rx=\"~a\" ry=\"~a\"" rx ry)
 		 (format t " cx=\"~a\" cy=\"~a\"" cx cy)
@@ -170,7 +170,6 @@ Function to print the boilerplate for SVG files that goes to the top of the file
 	 (nmax (floor (/ (+ total-width smin) (+ element-width smin))))
 	 (n (ceiling (/ (+ nmin nmax) 2)))
 	 (s (/ (- total-width (* n element-width)) (- n 1))))
-    (format t "~a ~a ~a ~e" nmin nmax n s)
     (loop for i from 0 below n
 	  collect (+ (* i (+ s element-width))
 		     (* element-width 0.5) ; this turns fraction to float
